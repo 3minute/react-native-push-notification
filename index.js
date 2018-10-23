@@ -165,6 +165,7 @@ Notifications.localNotificationSchedule = function (details: Object) {
 			fireDate: details.date.toISOString(),
 			alertTitle: details.title,
 			alertBody: details.message,
+			category: details.category,
 			soundName: soundName,
 			userInfo: details.userInfo,
 			repeatInterval: details.repeatType
@@ -275,12 +276,11 @@ Notifications.requestPermissions = function () {
 };
 
 /* Fallback functions */
-Notifications.subscribeToTopic = function () {
+Notifications.subscribeToTopic = function() {
 	return this.callNative('subscribeToTopic', arguments);
 };
 
-/* Fallback functions */
-Notifications.presentLocalNotification = function () {
+Notifications.presentLocalNotification = function() {
 	return this.callNative('presentLocalNotification', arguments);
 };
 
@@ -292,7 +292,11 @@ Notifications.cancelLocalNotifications = function () {
 	return this.callNative('cancelLocalNotifications', arguments);
 };
 
-Notifications.cancelAllLocalNotifications = function () {
+Notifications.clearLocalNotification = function() {
+    return this.callNative('clearLocalNotification', arguments);
+};
+
+Notifications.cancelAllLocalNotifications = function() {
 	return this.callNative('cancelAllLocalNotifications', arguments);
 };
 

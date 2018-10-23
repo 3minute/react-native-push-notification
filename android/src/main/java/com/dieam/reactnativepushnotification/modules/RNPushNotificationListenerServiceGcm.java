@@ -1,9 +1,5 @@
 package com.dieam.reactnativepushnotification.modules;
 
-import java.util.Map;
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.Application;
@@ -17,6 +13,7 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
+import com.google.android.gms.gcm.GcmListenerService; 
 
 import org.json.JSONObject;
 
@@ -25,26 +22,10 @@ import java.util.Random;
 
 import static com.dieam.reactnativepushnotification.modules.RNPushNotification.LOG_TAG;
 
-public class RNPushNotificationListenerService extends FirebaseMessagingService {
+public class RNPushNotificationListenerServiceGcm extends GcmListenerService {
 
     @Override
-    public void onMessageReceived(RemoteMessage message) {
-        Log.d("RNPNListenerService", "onMessageReceived:");
-        String from = message.getFrom();
-        RemoteMessage.Notification remoteNotification = message.getNotification();
-
-        final Bundle bundle = new Bundle();
-        // Putting it from remoteNotification first so it can be overriden if message
-        // data has it
-        if (remoteNotification != null) {
-            // ^ It's null when message is from GCM
-            bundle.putString("title", remoteNotification.getTitle());
-            bundle.putString("message", remoteNotification.getBody());
-        }
-
-        for(Map.Entry<String, String> entry : message.getData().entrySet()) {
-            bundle.putString(entry.getKey(), entry.getValue());
-        }
+    public void onMessageReceived(String from, final Bundle bundle) { 
         JSONObject data = getPushData(bundle.getString("data"));
         // Copy `twi_body` to `message` to support Twilio
         if (bundle.containsKey("twi_body")) {
@@ -73,29 +54,25 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
         Log.v(LOG_TAG, "onMessageReceived: " + bundle);
 
-        // We need to run this on the main thread, as the React code assumes that is
-        // true.
-        // Namely, DevServerHelper constructs a Handler() without a Looper, which
-        // triggers:
+        // We need to run this on the main thread, as the React code assumes that is true.
+        // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:
         // "Can't create handler inside thread that has not called Looper.prepare()"
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 // Construct and load our normal React JS code bundle
-                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost()
-                        .getReactInstanceManager();
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
                 ReactContext context = mReactInstanceManager.getCurrentReactContext();
                 // If it's constructed, send a notification
                 if (context != null) {
                     handleRemotePushNotification((ReactApplicationContext) context, bundle);
                 } else {
                     // Otherwise wait for construction, then send the notification
-                    mReactInstanceManager
-                            .addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
-                                public void onReactContextInitialized(ReactContext context) {
-                                    handleRemotePushNotification((ReactApplicationContext) context, bundle);
-                                }
-                            });
+                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                        public void onReactContextInitialized(ReactContext context) {
+                            handleRemotePushNotification((ReactApplicationContext) context, bundle);
+                        }
+                    });
                     if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
                         // Construct it in the background
                         mReactInstanceManager.createReactContextInBackground();
@@ -115,8 +92,7 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
     private void handleRemotePushNotification(ReactApplicationContext context, Bundle bundle) {
 
-        // If notification ID is not provided by the user for push notification,
-        // generate one at random
+        // If notification ID is not provided by the user for push notification, generate one at random
         if (bundle.getString("id") == null) {
             Random randomNumberGenerator = new Random(System.currentTimeMillis());
             bundle.putString("id", String.valueOf(randomNumberGenerator.nextInt()));
@@ -136,9 +112,11 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
         Log.v(LOG_TAG, "sendNotification: " + bundle);
 
-        Application applicationContext = (Application) context.getApplicationContext();
-        RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
-        pushNotificationHelper.sendToNotificationCentre(bundle);
+        if (!isForeground) {
+            Application applicationContext = (Application) context.getApplicationContext();
+            RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
+            pushNotificationHelper.sendToNotificationCentre(bundle);
+        }
     }
 
     private boolean isApplicationInForeground() {
