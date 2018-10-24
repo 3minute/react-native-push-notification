@@ -65,13 +65,8 @@ NotificationsComponent.prototype.abandonPermissions = function () {
 	/* Void */
 };
 
-<<<<<<< HEAD
-NotificationsComponent.prototype.checkPermissions = function (callback: Function) {
-	/* Void */
-=======
 NotificationsComponent.prototype.checkPermissions = function(callback: Function) {
 	RNPushNotification.checkPermissions().then(alert => callback({ alert }));
->>>>>>> ae4f9fd06dc46011e4c25f842f00462d7b4d35d2
 };
 
 NotificationsComponent.prototype.addEventListener = function (type: string, handler: Function) {
