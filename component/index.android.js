@@ -30,16 +30,19 @@ NotificationsComponent.prototype.requestPermissions = function (senderID: string
 	RNPushNotification.requestPermissions(senderID);
 };
 
-NotificationsComponent.prototype.subscribeToTopic = function (topic: string) {
+NotificationsComponent.prototype.subscribeToTopic = function(topic: string) {
 	RNPushNotification.subscribeToTopic(topic);
 };
 
-
-NotificationsComponent.prototype.cancelLocalNotifications = function (details: Object) {
+NotificationsComponent.prototype.cancelLocalNotifications = function(details: Object) {
 	RNPushNotification.cancelLocalNotifications(details);
 };
 
-NotificationsComponent.prototype.cancelAllLocalNotifications = function () {
+NotificationsComponent.prototype.clearLocalNotification = function(details: Object) {
+	RNPushNotification.clearLocalNotification(details);
+};
+
+NotificationsComponent.prototype.cancelAllLocalNotifications = function() {
 	RNPushNotification.cancelAllLocalNotifications();
 };
 
@@ -62,8 +65,8 @@ NotificationsComponent.prototype.abandonPermissions = function () {
 	/* Void */
 };
 
-NotificationsComponent.prototype.checkPermissions = function (callback: Function) {
-	/* Void */
+NotificationsComponent.prototype.checkPermissions = function(callback: Function) {
+	RNPushNotification.checkPermissions().then(alert => callback({ alert }));
 };
 
 NotificationsComponent.prototype.addEventListener = function (type: string, handler: Function) {
@@ -117,4 +120,3 @@ module.exports = {
 	state: false,
 	component: new NotificationsComponent()
 };
-

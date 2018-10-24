@@ -292,7 +292,15 @@ Notifications.cancelLocalNotifications = function () {
 	return this.callNative('cancelLocalNotifications', arguments);
 };
 
+<<<<<<< HEAD
 Notifications.cancelAllLocalNotifications = function () {
+=======
+Notifications.clearLocalNotification = function() {
+    return this.callNative('clearLocalNotification', arguments);
+};
+
+Notifications.cancelAllLocalNotifications = function() {
+>>>>>>> e6de9117a85e6486c781eba8d6e0c9c80f1d5f93
 	return this.callNative('cancelAllLocalNotifications', arguments);
 };
 
