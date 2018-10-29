@@ -31,14 +31,20 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
     public void onMessageReceived(RemoteMessage message) {
         Log.d("RNPNListenerService", "onMessageReceived:");
         String from = message.getFrom();
+
         final Bundle bundle = new Bundle();
-        for (Map.Entry<String, String> entry : message.getData().entrySet()) {
+        for(Map.Entry<String, String> entry : message.getData().entrySet()) {
             bundle.putString(entry.getKey(), entry.getValue());
         }
         JSONObject data = getPushData(bundle.getString("data"));
+        // Copy `twi_body` to `message` to support Twilio
+        if (bundle.containsKey("twi_body")) {
+            bundle.putString("message", bundle.getString("twi_body"));
+        }
+
         if (data != null) {
             if (!bundle.containsKey("message")) {
-                bundle.putString("message", data.optString("alert", "Notification received"));
+                bundle.putString("message", data.optString("alert", null));
             }
             if (!bundle.containsKey("title")) {
                 bundle.putString("title", data.optString("title", null));
@@ -124,7 +130,6 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
         Application applicationContext = (Application) context.getApplicationContext();
         RNPushNotificationHelper pushNotificationHelper = new RNPushNotificationHelper(applicationContext);
         pushNotificationHelper.sendToNotificationCentre(bundle);
-
     }
 
     private boolean isApplicationInForeground() {
