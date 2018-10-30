@@ -387,6 +387,7 @@ public class RNPushNotificationHelper {
             sendNotificationWithImage(bundle, null);
             return;
         }
+        Fresco.initialize(context);
 
         ImagePipeline imagePipeline = Fresco.getImagePipeline();
 
