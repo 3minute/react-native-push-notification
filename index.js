@@ -228,9 +228,10 @@ Notifications._onNotification = function (data, isFromBackground = null) {
 			});
 		} else {
 			var notificationData = {
+				...data,
 				foreground: !isFromBackground,
-				finish: () => { },
-				...data
+				userInteraction: isFromBackground,
+				finish: () => { }
 			};
 
 			if (typeof notificationData.data === 'string') {
@@ -292,11 +293,11 @@ Notifications.cancelLocalNotifications = function () {
 	return this.callNative('cancelLocalNotifications', arguments);
 };
 
-Notifications.clearLocalNotification = function() {
-    return this.callNative('clearLocalNotification', arguments);
+Notifications.clearLocalNotification = function () {
+	return this.callNative('clearLocalNotification', arguments);
 };
 
-Notifications.cancelAllLocalNotifications = function() {
+Notifications.cancelAllLocalNotifications = function () {
 	return this.callNative('cancelAllLocalNotifications', arguments);
 };
 
